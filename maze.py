@@ -16,7 +16,7 @@ class Cell:
 	NWpoint: a Point object showing the top left of the cell.
 	side_length: the length of a side. Cells will be square, so this will serve for horizontal and vertical
 	"""
-	def __init__(self, NWpoint:Point, side_length:int, window:Window):
+	def __init__(self, NWpoint:Point, side_length:int, window:Window=None):
 		self.NWpoint = NWpoint
 		self.side_length = side_length
 		self.has_left_wall = True
@@ -44,6 +44,8 @@ class Cell:
 		return Point(x,y)
 
 	def draw(self):
+		if self.window is None:
+			return
 		NWpoint = self.getNWpoint()
 		SWpoint = self.getSWpoint()
 		SEpoint = self.getSEpoint()
@@ -97,14 +99,15 @@ win: the GUI window used to display the maze
 cells: a 2D array holding all cells
 """
 class Maze:
-	def __init__(self, NWpoint:Point, cell_side_length:int, num_rows:int, num_cols:int, win:Window):
+	def __init__(self, NWpoint:Point, cell_side_length:int, num_rows:int, num_cols:int, window:Window=None):
 		self.NWpoint = NWpoint
 		self.cell_side_length = cell_side_length
 		self.num_rows = num_rows
 		self.num_cols = num_cols
-		self.win = win
+		self.window = window
 		self.cells = []
 		self.create_cells()
+		self.open_entrance_and_exit()
 		self.draw_cells()
 
 	def create_cells(self):
@@ -114,16 +117,22 @@ class Maze:
 				x = self.NWpoint.x + c*self.cell_side_length
 				y = self.NWpoint.y + r*self.cell_side_length
 				cell_NWpoint = Point(x, y)
-				cell = Cell(cell_NWpoint, self.cell_side_length, self.win)
+				cell = Cell(cell_NWpoint, self.cell_side_length, self.window)
 				col.append(cell)
 			self.cells.append(col)
+
+	def open_entrance_and_exit(self):
+		self.cells[0][0].has_top_wall = False
+		self.cells[-1][-1].has_bottom_wall = False
 	
 	def draw_cells(self):
+		if self.window is None:
+			return
 		for col in self.cells:
 			for cell in col:
 				cell.draw()
 				self.animate()
 
 	def animate(self):
-		self.win.redraw()
-		sleep(0.05)
+		self.window.redraw()
+		sleep(0.01)
